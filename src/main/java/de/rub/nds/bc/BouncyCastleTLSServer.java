@@ -43,13 +43,13 @@ public class BouncyCastleTLSServer {
 
     private static final Logger LOGGER = LogManager.getLogger(BouncyCastleTLSServer.class);
 
-    private static final String PATH_TO_JKS = "rsa2048.jks";
+    private static final String PATH_TO_JKS = "keystore.jks";
 
-    private static final String JKS_PASSWORD = "password";
+    private static final String JKS_PASSWORD = "changeit";
 
-    private static final String ALIAS = "1";
+    private static final String ALIAS = "server-alias";
 
-    private static final int PORT = 4433;
+    private static final int PORT = 8888;
 
     private final int port;
 
