@@ -34,11 +34,20 @@ public class ConnectionHandler implements Runnable {
 	    final BufferedReader br = new BufferedReader(new InputStreamReader(tlsServerProtocol.getInputStream()));
 	    final BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(tlsServerProtocol.getOutputStream()));
 	    String line = "";
-	    while ((line = br.readLine()) != null) {
+//	    while ((line = br.readLine()) != null) {
 		LOGGER.debug(line);
-		bw.write("ack");
+		bw.write("HTTP/1.1 200 OK\n"+
+						"Date: Sun, 18 Oct 2009 08:56:53 GMT\n"+
+				"Last-Modified: Sat, 20 Nov 2004 07:16:26 GMT\n"+
+				"ETag: 10000000565a5-2c-3e94b66c2e680\n" +
+				"Accept-Ranges: bytes\n"+
+				"Content-Length: 44\n"+
+				"Connection: close\n"+
+				"Content-Type: text/html\n"+
+				"\r\n\r\n"+
+				"<html><body><h1>It works!</h1></body></html>\n");
 		bw.flush();
-	    }
+//	    }
 	} catch (IOException e) {
 	    LOGGER.debug(e.getLocalizedMessage(), e);
 	} finally {

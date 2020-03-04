@@ -138,7 +138,6 @@ public class BouncyCastleTLSServer {
     }
 
     public void start() throws IOException {
-        AsymmetricKeyParameter key = PrivateKeyFactory.createKey(rsaKeyPair.getPrivate().getEncoded());
         TlsCrypto tlsCrypto=(new JcaTlsCryptoProvider()).create(new SecureRandom());
         if(!(tlsCrypto instanceof JcaTlsCrypto))
             throw new TlsCryptoException("Client #19", new ClassCastException("tlsCrypto !instanceof JcaTlsCrypto"));
@@ -164,10 +163,7 @@ public class BouncyCastleTLSServer {
 
                     @Override
                     protected TlsCredentialedDecryptor getRSAEncryptionCredentials() throws IOException {
-//                        return new JceDefaultTlsCredentialedDecryptor(context.getCrypto(), rsaCert, PrivateKeyFactory.createKey(rsaKeyPair.getPrivate().getEncoded()));
                         try {
-
-//                            BcTlsCrypto(new SecureRandom()),
                             return new JceDefaultTlsCredentialedDecryptor(jcaTlsCrypto, loadTLSCertificate(keyStore, alias, context), rsaKeyPair.getPrivate());
                         } catch (KeyStoreException e) {
                             e.printStackTrace();
@@ -199,24 +195,12 @@ public class BouncyCastleTLSServer {
                     protected int[] getCipherSuites() {
                         int[] defaultCiphers = new int[0];//super.getCipherSuites();
                         int[] newCiphers = new int[]{
-//                        CipherSuite.TLS_RSA_EXPORT_WITH_DES40_CBC_SHA,
-//                        CipherSuite.TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5,
-//                        CipherSuite.TLS_RSA_EXPORT_WITH_RC4_40_MD5,
-//                        CipherSuite.TLS_RSA_PSK_WITH_3DES_EDE_CBC_SHA,
-//                        CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA,
-//                        CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA256,
-//                        CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
-//                        CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA,
-//                        CipherSuite.TLS_RSA_WITH_NULL_SHA,
                         CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
                         CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256
-//                        CipherSuite.TLS_RSA_PSK_WITH_CAMELLIA_256_CBC_SHA384,
-//                        CipherSuite.TLS_RSA_WITH_RC4_128_SHA
                         };
                         int[] ciphers = new int[defaultCiphers.length + newCiphers.length];
                         System.arraycopy(defaultCiphers, 0, ciphers, 0, defaultCiphers.length);
                         System.arraycopy(newCiphers, 0, ciphers, defaultCiphers.length, newCiphers.length);
-                        System.out.println("test2");
 
                         return ciphers;
                     }
