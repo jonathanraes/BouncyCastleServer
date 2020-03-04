@@ -10,17 +10,20 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tls.*;
 import org.bouncycastle.tls.Certificate;
 import org.bouncycastle.tls.crypto.TlsCertificate;
+import org.bouncycastle.tls.crypto.TlsCrypto;
+import org.bouncycastle.tls.crypto.TlsCryptoException;
 import org.bouncycastle.tls.crypto.TlsCryptoParameters;
-import org.bouncycastle.tls.crypto.impl.bc.BcDefaultTlsCredentialedDecryptor;
 import org.bouncycastle.tls.crypto.impl.bc.BcTlsCertificate;
 import org.bouncycastle.tls.crypto.impl.bc.BcTlsCrypto;
-import org.bouncycastle.tls.crypto.impl.bc.BcTlsRSASigner;
+import org.bouncycastle.tls.crypto.impl.jcajce.JcaTlsCrypto;
+import org.bouncycastle.tls.crypto.impl.jcajce.JcaTlsCryptoProvider;
+import org.bouncycastle.tls.crypto.impl.jcajce.JcaTlsRSASigner;
+import org.bouncycastle.tls.crypto.impl.jcajce.JceDefaultTlsCredentialedDecryptor;
 
 /**
  * Basic Bouncy Castle TLS server. Do not use for real applications, just a demo
@@ -73,15 +76,12 @@ public class BouncyCastleTLSServer {
 
     public void addRsaKey(KeyStore keyStore, String password, String alias) throws IOException,
             KeyStoreException, CertificateEncodingException, NoSuchAlgorithmException, UnrecoverableKeyException {
-//        rsaCert = loadTLSCertificate(keyStore, alias, );
         this.keyStore = keyStore;
         this.alias = alias;
         rsaKeyPair = getKeyPair(keyStore, alias, password.toCharArray());
     }
 
-    public void addEcKey(KeyStore keyStore, String password, String alias) throws IOException,
-            KeyStoreException, CertificateEncodingException, NoSuchAlgorithmException, UnrecoverableKeyException {
-//        ecCert = loadTLSCertificate(keyStore, alias);
+    public void addEcKey(KeyStore keyStore, String password, String alias) throws KeyStoreException, CertificateEncodingException, NoSuchAlgorithmException, UnrecoverableKeyException {
         ecKeyPair = getKeyPair(keyStore, alias, password.toCharArray());
     }
 
@@ -139,15 +139,19 @@ public class BouncyCastleTLSServer {
 
     public void start() throws IOException {
         AsymmetricKeyParameter key = PrivateKeyFactory.createKey(rsaKeyPair.getPrivate().getEncoded());
+        TlsCrypto tlsCrypto=(new JcaTlsCryptoProvider()).create(new SecureRandom());
+        if(!(tlsCrypto instanceof JcaTlsCrypto))
+            throw new TlsCryptoException("Client #19", new ClassCastException("tlsCrypto !instanceof JcaTlsCrypto"));
+        JcaTlsCrypto jcaTlsCrypto=(JcaTlsCrypto)tlsCrypto;
         while (!shutdown) {
             try {
                 LOGGER.info("Listening on port " + port + "...\n");
                 final Socket socket = serverSocket.accept();
 
-                DefaultTlsServer server = new DefaultTlsServer(new BcTlsCrypto(new SecureRandom())) {
+                DefaultTlsServer server = new DefaultTlsServer(jcaTlsCrypto) {
                     @Override
                     protected TlsCredentialedSigner getRSASignerCredentials() throws IOException {
-                        BcTlsRSASigner signer = new BcTlsRSASigner(new BcTlsCrypto(new SecureRandom()), (RSAKeyParameters) key);
+                        JcaTlsRSASigner signer = new JcaTlsRSASigner(jcaTlsCrypto, rsaKeyPair.getPrivate());
                         try {
                             return new DefaultTlsCredentialedSigner(new TlsCryptoParameters(context), signer, loadTLSCertificate(keyStore, alias, context), new SignatureAndHashAlgorithm(HashAlgorithm.sha256, SignatureAlgorithm.rsa));
                         } catch (KeyStoreException e) {
@@ -160,10 +164,11 @@ public class BouncyCastleTLSServer {
 
                     @Override
                     protected TlsCredentialedDecryptor getRSAEncryptionCredentials() throws IOException {
-//                         TODO PrivateKeyFactory possibly old api?
 //                        return new JceDefaultTlsCredentialedDecryptor(context.getCrypto(), rsaCert, PrivateKeyFactory.createKey(rsaKeyPair.getPrivate().getEncoded()));
                         try {
-                            return new BcDefaultTlsCredentialedDecryptor(new BcTlsCrypto(new SecureRandom()), loadTLSCertificate(keyStore, alias, context), key);
+
+//                            BcTlsCrypto(new SecureRandom()),
+                            return new JceDefaultTlsCredentialedDecryptor(jcaTlsCrypto, loadTLSCertificate(keyStore, alias, context), rsaKeyPair.getPrivate());
                         } catch (KeyStoreException e) {
                             e.printStackTrace();
                         } catch (CertificateEncodingException e) {
@@ -173,30 +178,18 @@ public class BouncyCastleTLSServer {
                     }
 
                     @Override
-                    public BcDefaultTlsCredentialedDecryptor getCredentials() throws IOException {
+                    public JceDefaultTlsCredentialedDecryptor getCredentials() throws IOException {
                         switch (selectedCipherSuite) {
-                            case CipherSuite.TLS_RSA_EXPORT_WITH_DES40_CBC_SHA:
-                            case CipherSuite.TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5:
-                            case CipherSuite.TLS_RSA_EXPORT_WITH_RC4_40_MD5:
-                            case CipherSuite.TLS_RSA_PSK_WITH_3DES_EDE_CBC_SHA:
-                            case CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA:
-                            case CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA256:
-                            case CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256:
-                            case CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA:
-                            case CipherSuite.TLS_RSA_WITH_NULL_SHA:
-                            case CipherSuite.TLS_RSA_PSK_WITH_CAMELLIA_256_CBC_SHA384:
-                            case CipherSuite.TLS_RSA_WITH_RC4_128_SHA:
-                            case CipherSuite.TLS_RSA_WITH_AES_256_GCM_SHA384:
+                            case CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA:
+                            case CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256:
                                 try {
-                                    return new BcDefaultTlsCredentialedDecryptor(new BcTlsCrypto(new SecureRandom()), loadTLSCertificate(keyStore, alias, context), key);
+                                    return new JceDefaultTlsCredentialedDecryptor(jcaTlsCrypto, loadTLSCertificate(keyStore, alias, context), rsaKeyPair.getPrivate());
                                 } catch (KeyStoreException e) {
                                     e.printStackTrace();
                                 } catch (CertificateEncodingException e) {
                                     e.printStackTrace();
                                 }
-
                                 return null;
-//                                return new DefaultTlsSignerCredentials(context, ecCert, PrivateKeyFactory.createKey(ecKeyPair.getPrivate().getEncoded()));
                             default:
                                 return null;
                         }
@@ -206,21 +199,24 @@ public class BouncyCastleTLSServer {
                     protected int[] getCipherSuites() {
                         int[] defaultCiphers = new int[0];//super.getCipherSuites();
                         int[] newCiphers = new int[]{
-                        CipherSuite.TLS_RSA_EXPORT_WITH_DES40_CBC_SHA,
-                        CipherSuite.TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5,
-                        CipherSuite.TLS_RSA_EXPORT_WITH_RC4_40_MD5,
-                        CipherSuite.TLS_RSA_PSK_WITH_3DES_EDE_CBC_SHA,
-                        CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA,
-                        CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA256,
-                        CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
-                        CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA,
-                        CipherSuite.TLS_RSA_WITH_NULL_SHA,
-                        CipherSuite.TLS_RSA_WITH_AES_256_GCM_SHA384,
-                        CipherSuite.TLS_RSA_PSK_WITH_CAMELLIA_256_CBC_SHA384,
-                        CipherSuite.TLS_RSA_WITH_RC4_128_SHA};
+//                        CipherSuite.TLS_RSA_EXPORT_WITH_DES40_CBC_SHA,
+//                        CipherSuite.TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5,
+//                        CipherSuite.TLS_RSA_EXPORT_WITH_RC4_40_MD5,
+//                        CipherSuite.TLS_RSA_PSK_WITH_3DES_EDE_CBC_SHA,
+//                        CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA,
+//                        CipherSuite.TLS_RSA_PSK_WITH_AES_128_CBC_SHA256,
+//                        CipherSuite.TLS_RSA_PSK_WITH_AES_128_GCM_SHA256,
+//                        CipherSuite.TLS_RSA_PSK_WITH_AES_256_CBC_SHA,
+//                        CipherSuite.TLS_RSA_WITH_NULL_SHA,
+                        CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+                        CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256
+//                        CipherSuite.TLS_RSA_PSK_WITH_CAMELLIA_256_CBC_SHA384,
+//                        CipherSuite.TLS_RSA_WITH_RC4_128_SHA
+                        };
                         int[] ciphers = new int[defaultCiphers.length + newCiphers.length];
                         System.arraycopy(defaultCiphers, 0, ciphers, 0, defaultCiphers.length);
                         System.arraycopy(newCiphers, 0, ciphers, defaultCiphers.length, newCiphers.length);
+                        System.out.println("test2");
 
                         return ciphers;
                     }
