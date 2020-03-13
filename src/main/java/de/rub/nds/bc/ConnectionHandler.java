@@ -37,15 +37,15 @@ public class ConnectionHandler implements Runnable {
 //	    while ((line = br.readLine()) != null) {
 		LOGGER.debug(line);
 		bw.write("HTTP/1.1 200 OK\n"+
-						"Date: Sun, 18 Oct 2009 08:56:53 GMT\n"+
-				"Last-Modified: Sat, 20 Nov 2004 07:16:26 GMT\n"+
-				"ETag: 10000000565a5-2c-3e94b66c2e680\n" +
-				"Accept-Ranges: bytes\n"+
-				"Content-Length: 44\n"+
-				"Connection: close\n"+
-				"Content-Type: text/html\n"+
-				"\r\n\r\n"+
-				"<html><body><h1>It works!</h1></body></html>\n");
+						"Date: Sun, 18 Oct 2009 08:56:53 GMT\r\n"+
+				"Last-Modified: Sat, 20 Nov 2004 07:16:26 GMT\r\n"+
+				"ETag: 10000000565a5-2c-3e94b66c2e680\r\n" +
+				"Accept-Ranges: bytes\r\n"+
+				"Content-Length: 44\r\n"+
+				"Connection: close\r\n"+
+				"Content-Type: text/html\r\n"+
+				"\r\n"+
+				"<html><body><h1>It works!</h1></body></html>\r\n");
 		bw.flush();
 //	    }
 	} catch (IOException e) {
