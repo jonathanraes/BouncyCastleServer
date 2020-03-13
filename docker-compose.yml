@@ -1,0 +1,52 @@
+version: '2.1'
+services:
+  attacker:
+    container_name: 'attacker'
+    command: ./attacker.sh
+    image: robotattack
+    volumes:
+      - ./:/tmp
+    environment:
+      - "PYTHONUNBUFFERED=1"
+    networks:
+      frontend:
+        ipv4_address: 10.0.1.10
+
+  ids:
+    container_name: 'client'
+    command: ./client.sh
+    image: robotattack
+    volumes:
+      - ./:/tmp
+    environment:
+      - "PYTHONUNBUFFERED=1"
+    networks:
+      frontend:
+        ipv4_address: 10.0.1.20
+
+  server: 
+    container_name: 'server'
+    command: ./server.sh
+    image: robotattack
+    volumes:
+      - ./:/tmp
+    environment:
+      - "PYTHONUNBUFFERED=1"
+    networks:
+      frontend:
+        ipv4_address: 10.0.1.30
+
+networks:
+  frontend:
+    driver: bridge
+    ipam:
+      config:
+      -
+        subnet: 10.0.1.0/24
+  backend:
+    driver: bridge
+    ipam:
+      config:
+      -
+        subnet: 10.0.2.0/24
+
