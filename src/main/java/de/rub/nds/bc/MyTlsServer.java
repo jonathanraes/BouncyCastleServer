@@ -8,6 +8,7 @@ import org.bouncycastle.tls.crypto.impl.jcajce.JcaTlsCrypto;
 import org.bouncycastle.tls.crypto.impl.jcajce.JcaTlsRSASigner;
 import org.bouncycastle.tls.crypto.impl.jcajce.JceDefaultTlsCredentialedDecryptor;
 
+import java.io.IOException;
 import java.security.KeyPair;
 
 public class MyTlsServer extends DefaultTlsServer {
@@ -44,6 +45,20 @@ public class MyTlsServer extends DefaultTlsServer {
             default:
                 return null;
         }
+    }
+
+
+    @Override
+    public void notifyHandshakeComplete() throws IOException {
+        super.notifyHandshakeComplete();
+        byte[] secretBytes = getMasterSecret().extract();
+        StringBuffer hexString = new StringBuffer();
+        for (int i=0;i<secretBytes.length;i++) {
+            hexString.append(Integer.toHexString(0xFF & secretBytes[i]));
+        }
+        System.out.println("Connection opened");
+        System.out.println("Master secret: " + hexString);
+        System.out.println("PRF algorithm: " + context.getSecurityParameters().getPrfAlgorithm());
     }
 
     @Override

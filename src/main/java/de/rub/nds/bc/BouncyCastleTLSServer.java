@@ -130,8 +130,6 @@ public class BouncyCastleTLSServer {
                 Thread t = new Thread(ch);
                 t.start();
 
-                System.out.println(server.getMasterSecret());
-
             } catch (IOException | NullPointerException ex) {
                 LOGGER.info(ex.getLocalizedMessage(), ex);
             }
