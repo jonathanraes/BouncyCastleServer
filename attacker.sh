@@ -8,3 +8,8 @@
 #   3. byte[] secret supplied in hmacHash() is premaster secret 
 #   4. seed = ClientHello.random + ServerHello.random (TlsImplUtils: Arrays.concatenate(securityParameters.getServerRandom(), securityParameters.getClientRandom());)
 # 5. Use master secret as AES key to decrypt any followig packet 
+
+ifconfig
+
+sleep 3
+python3 attack.py
