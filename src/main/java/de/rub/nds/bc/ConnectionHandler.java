@@ -49,7 +49,7 @@ public class ConnectionHandler implements Runnable {
 		bw.flush();
 //	    }
 	} catch (IOException e) {
-	    LOGGER.debug(e.getLocalizedMessage(), e);
+//	    LOGGER.debug(e.getLocalizedMessage(), e);
 	} finally {
 	    try {
 	    tlsServerProtocol.close();

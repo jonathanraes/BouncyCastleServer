@@ -117,9 +117,9 @@ public class BouncyCastleTLSServer {
         if(!(tlsCrypto instanceof JcaTlsCrypto))
             throw new TlsCryptoException("Client #19", new ClassCastException("tlsCrypto !instanceof JcaTlsCrypto"));
         JcaTlsCrypto jcaTlsCrypto=(JcaTlsCrypto)tlsCrypto;
+        LOGGER.info("Listening on port " + port + "...\n");
         while (!shutdown) {
             try {
-                LOGGER.info("Listening on port " + port + "...\n");
                 final Socket socket = serverSocket.accept();
 
                 MyTlsServer server = new MyTlsServer(jcaTlsCrypto, rsaKeyPair, rsaCert);
@@ -131,7 +131,7 @@ public class BouncyCastleTLSServer {
                 t.start();
 
             } catch (IOException | NullPointerException ex) {
-                LOGGER.info(ex.getLocalizedMessage(), ex);
+//                LOGGER.info(ex.getLocalizedMessage(), ex);
             }
         }
 
