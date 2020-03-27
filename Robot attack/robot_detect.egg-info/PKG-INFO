@@ -1,0 +1,33 @@
+Metadata-Version: 1.2
+Name: robot-detect
+Version: 0.3
+Summary: Detection for ROBOT vulnerability
+Home-page: https://www.robotattack.org
+Author: Hanno Böck, Juraj Somorovsky, Craig Young, Tibor Jager
+Author-email: hanno@hboeck.de
+License: CC0
+Description: 
+        robot-detect
+        ============
+        
+        Tool to detect and exploit the ROBOT vulnerability (Return of
+        Bleichenbacher's Oracle Threat).
+        
+        More Info:
+        
+        https://robotattack.org/
+        
+Keywords: tls,robot,security,vulnerability
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: System Administrators
+Classifier: License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.1
+Classifier: Programming Language :: Python :: 3.2
+Classifier: Programming Language :: Python :: 3.3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Requires-Python: >=3

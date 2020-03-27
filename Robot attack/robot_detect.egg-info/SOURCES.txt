@@ -1,0 +1,9 @@
+README.md
+robot-detect
+setup.py
+robot_detect.egg-info/PKG-INFO
+robot_detect.egg-info/SOURCES.txt
+robot_detect.egg-info/dependency_links.txt
+robot_detect.egg-info/requires.txt
+robot_detect.egg-info/top_level.txt
+robot_detect.egg-info/zip-safe
